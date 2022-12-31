@@ -18,14 +18,19 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
+#include "dma.h"
 #include "i2c.h"
 #include "iwdg.h"
+#include "tim.h"
 #include "usart.h"
 #include "gpio.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include <stdlib.h>
+#include "ws2812b.h"
+#include "UART_IT.h"
+#include "lsm303d.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -97,17 +102,13 @@ int main(void)
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
+  MX_DMA_Init();
   MX_USART2_UART_Init();
   MX_I2C1_Init();
   MX_IWDG_Init();
+  MX_TIM3_Init();
   /* USER CODE BEGIN 2 */
-  uint8_t test = 0x5A;
-  if (eepromWrite(0x10, &test, sizeof(test)) != HAL_OK)
-    Error_Handler();
-   
-  uint8_t result = 0;
-  while (eepromRead(0x10, &result, sizeof(result)) != HAL_OK)
-    {}
+  ws2812b_init();
 
 
   HAL_UART_Receive_IT(&huart2, &uart_rx_buffer, 1);
@@ -115,14 +116,20 @@ int main(void)
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
+
+  lsm_write_reg(LSM303D_CTRL5, 0x80|0x10);
+  HAL_Delay(100);
   while (1)
   {
+	  int16_t temp = lsm_read_value(LSM303D_TEMP_OUT);
+	  HAL_Delay(1000);
+  }
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
   }
   /* USER CODE END 3 */
-}
+
 
 /**
   * @brief System Clock Configuration

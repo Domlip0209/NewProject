@@ -1,40 +1,43 @@
 #include "UART_IT.h"
 
- #define LINE_MAX_LENGTH 80
+#define LINE_MAX_LENGTH 80
 
 static char line_buffer[LINE_MAX_LENGTH + 1];
 static uint32_t line_length;
+static uint8_t r = gamma8[rand() % 256];
+static uint8_t g = gamma8[rand() % 256];
+static uint8_t b = gamma8[rand() % 256];
  
 void line_append(uint8_t value)
 {
   if (value == '\r' || value == '\n') {
-    // odebraliśmy znak końca linii
+  
     if (line_length > 0) {
-      // dodajemy 0 na końcu linii
+ 
       line_buffer[line_length] = '\0';
-      // przetwarzamy dane
+  
       if (strcmp(line_buffer, "on") == 0) {
-        HAL_GPIO_WritePin(LD2_GPIO_Port, LD2_Pin, GPIO_PIN_SET);
+       
+  		for (int led = 0; led < 6; led++) {
+   			ws2812b_set_color(led, r, g, b);
+   			ws2812b_update();}
       } else if (strcmp(line_buffer, "off") == 0) {
-        HAL_GPIO_WritePin(LD2_GPIO_Port, LD2_Pin, GPIO_PIN_RESET);
+        ws2812b_init();
       }
  
-      // zaczynamy zbieranie danych od nowa
       line_length = 0;
     }
   }
   else {
     if (line_length >= LINE_MAX_LENGTH) {
-      // za dużo danych, usuwamy wszystko co odebraliśmy dotychczas
       line_length = 0;
     }
-    // dopisujemy wartość do bufora
     line_buffer[line_length++] = value;
   }
 }
 
 static uint8_t uart_rx_buffer;
- 
+ // my usart is build in my microcontroler and using "huart2"
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 {
   if (huart == &huart2) {
