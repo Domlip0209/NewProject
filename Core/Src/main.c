@@ -21,6 +21,7 @@
 #include "dma.h"
 #include "i2c.h"
 #include "iwdg.h"
+#include "spi.h"
 #include "tim.h"
 #include "usart.h"
 #include "gpio.h"
@@ -107,6 +108,7 @@ int main(void)
   MX_I2C1_Init();
   MX_IWDG_Init();
   MX_TIM3_Init();
+  MX_SPI2_Init();
   /* USER CODE BEGIN 2 */
   ws2812b_init();
 
@@ -116,20 +118,26 @@ int main(void)
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
+  	  float tempValue;
+  	  wchar_t msg[16];
 
-  lsm_write_reg(LSM303D_CTRL5, 0x80|0x10);
-  HAL_Delay(100);
+    swprintf(msg, 16, L"pi = %f :)", value);
+    hagl_put_text(msg, 40, 55, YELLOW, font6x9);
+    lsm_write_reg(LSM303D_CTRL5, 0x80|0x10);
+    HAL_Delay(100);
   while (1)
   {
-	  int16_t temp = lsm_read_value(LSM303D_TEMP_OUT);
-	  HAL_Delay(1000);
+	  tempValue = lsm_read_value(LSM303D_TEMP_OUT);
+	  swprintf(msg, 16, L"temp = %f :)", tempValue);
+	    hagl_put_text(msg, 40, 55, YELLOW, font6x9);
+	    HAL_Delay(1000);
   }
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
   }
   /* USER CODE END 3 */
-
+}
 
 /**
   * @brief System Clock Configuration
