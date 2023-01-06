@@ -112,6 +112,7 @@ int main(void)
   MX_SPI2_Init();
   /* USER CODE BEGIN 2 */
   ws2812b_init();
+  HAL_IWDG_Refresh(&hiwdg);
   lcd_init();
   HAL_UART_Receive_IT(&huart2, &uart_rx_buffer, 1);
   void HAL_SPI_TxCpltCallback(SPI_HandleTypeDef *hspi)
@@ -142,9 +143,8 @@ int main(void)
 	  tempValue = lsm_read_value(LSM303D_TEMP_OUT);
 	  swprintf(msg, 16, L"temp = %.2f :)", tempValue);
 	    hagl_put_text(msg, 40, 55, YELLOW, font6x9);
-	    HAL_Delay(1000);
-
 	    HAL_IWDG_Refresh(&hiwdg);
+	    HAL_Delay(1000);
   }
     /* USER CODE END WHILE */
 
