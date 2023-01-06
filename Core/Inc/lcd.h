@@ -11,6 +11,9 @@
 #pragma once
  
 #include <stdint.h>
+#include <stdbool.h>
+ 
+
  
 #define LCD_WIDTH	160
 #define LCD_HEIGHT	128
@@ -28,4 +31,6 @@
 void lcd_init(void);
 void lcd_put_pixel(int x, int y, uint16_t color);
 void lcd_copy(void);
+void lcd_transfer_done(void);
+bool lcd_is_busy(void);
 #endif /* INC_LCD_H_ */

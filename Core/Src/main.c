@@ -32,6 +32,7 @@
 #include "ws2812b.h"
 #include "UART_IT.h"
 #include "lsm303d.h"
+#include "lcd.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -111,9 +112,22 @@ int main(void)
   MX_SPI2_Init();
   /* USER CODE BEGIN 2 */
   ws2812b_init();
-
-
+  lcd_init();
   HAL_UART_Receive_IT(&huart2, &uart_rx_buffer, 1);
+  void HAL_SPI_TxCpltCallback(SPI_HandleTypeDef *hspi)
+  {
+  	if (hspi == &hspi2)
+  	{
+  		HAL_GPIO_WritePin(LCD_CS_GPIO_Port, LCD_CS_Pin, GPIO_PIN_SET);
+  	}
+  }
+  void HAL_SPI_TxCpltCallback(SPI_HandleTypeDef *hspi)
+  {
+  	if (hspi == &hspi2)
+  	{
+  		lcd_transfer_done();
+  	}
+  }
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -121,16 +135,16 @@ int main(void)
   	  float tempValue;
   	  wchar_t msg[16];
 
-    swprintf(msg, 16, L"pi = %f :)", value);
-    hagl_put_text(msg, 40, 55, YELLOW, font6x9);
     lsm_write_reg(LSM303D_CTRL5, 0x80|0x10);
     HAL_Delay(100);
   while (1)
   {
 	  tempValue = lsm_read_value(LSM303D_TEMP_OUT);
-	  swprintf(msg, 16, L"temp = %f :)", tempValue);
+	  swprintf(msg, 16, L"temp = %.2f :)", tempValue);
 	    hagl_put_text(msg, 40, 55, YELLOW, font6x9);
 	    HAL_Delay(1000);
+
+	    HAL_IWDG_Refresh(&hiwdg);
   }
     /* USER CODE END WHILE */
 
