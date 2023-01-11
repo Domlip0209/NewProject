@@ -63,7 +63,6 @@ void SystemClock_Config(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-
 int __io_putchar(int ch)
 {
   if (ch == '\n') {
@@ -73,6 +72,26 @@ int __io_putchar(int ch)
   HAL_UART_Transmit(&huart2, (uint8_t*)&ch, 1, HAL_MAX_DELAY);
  
   return 1;
+}
+
+  void HAL_SPI_TxCpltCallback(SPI_HandleTypeDef *hspi)
+  {
+  	if (hspi == &hspi2)
+  	{
+  		lcd_transfer_done();
+  	}
+
+  }
+
+static uint8_t uart_rx_buffer;
+ // my usart is build in my microcontroler and using "huart2"
+
+void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
+{
+  if (huart == &huart2) {
+    line_append(uart_rx_buffer);
+    HAL_UART_Receive_IT(&huart2, &uart_rx_buffer, 1);
+  }
 }
 /* USER CODE END 0 */
 
@@ -111,24 +130,14 @@ int main(void)
   MX_TIM3_Init();
   MX_SPI2_Init();
   /* USER CODE BEGIN 2 */
+
   ws2812b_init();
   HAL_IWDG_Refresh(&hiwdg);
   lcd_init();
+
+
   HAL_UART_Receive_IT(&huart2, &uart_rx_buffer, 1);
-  void HAL_SPI_TxCpltCallback(SPI_HandleTypeDef *hspi)
-  {
-  	if (hspi == &hspi2)
-  	{
-  		HAL_GPIO_WritePin(LCD_CS_GPIO_Port, LCD_CS_Pin, GPIO_PIN_SET);
-  	}
-  }
-  void HAL_SPI_TxCpltCallback(SPI_HandleTypeDef *hspi)
-  {
-  	if (hspi == &hspi2)
-  	{
-  		lcd_transfer_done();
-  	}
-  }
+
   /* USER CODE END 2 */
 
   /* Infinite loop */

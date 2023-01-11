@@ -1,12 +1,11 @@
 /*
  * lcd.c
  *
- *  Created on: 3 sty 2023
- *      Author: Dominik
  */
 #include "lcd.h"
 #include "spi.h"
 
+#define CMD(x)			((x) | 0x100)
 #define ST7735S_SLPOUT			0x11
 #define ST7735S_DISPOFF			0x28
 #define ST7735S_DISPON			0x29
@@ -29,6 +28,25 @@
 #define ST7735S_GAMCTRN1		0xe1
 
 static uint16_t frame_buffer[LCD_WIDTH * LCD_HEIGHT];
+
+
+ 
+static void lcd_send(uint16_t value)
+{
+	if (value & 0x100) {
+		lcd_cmd(value);
+	} else {
+		lcd_data(value);
+	}
+}
+
+static void lcd_cmd(uint8_t cmd)
+{
+	HAL_GPIO_WritePin(LCD_DC_GPIO_Port, LCD_DC_Pin, GPIO_PIN_RESET);
+	HAL_GPIO_WritePin(LCD_CS_GPIO_Port, LCD_CS_Pin, GPIO_PIN_RESET);
+	HAL_SPI_Transmit(&hspi2, &cmd, 1, HAL_MAX_DELAY);
+	HAL_GPIO_WritePin(LCD_CS_GPIO_Port, LCD_CS_Pin, GPIO_PIN_SET);
+}
 
 void lcd_init(void)
 {

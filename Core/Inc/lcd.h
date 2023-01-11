@@ -1,8 +1,7 @@
 /*
  * lcd.h
  *
- *  Created on: 3 sty 2023
- *      Author: Dominik
+
  */
 
 #ifndef INC_LCD_H_
